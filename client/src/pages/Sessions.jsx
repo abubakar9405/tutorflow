@@ -52,8 +52,21 @@ export default function Sessions() {
     load();
   };
 
+  const reschedule = async (id) => {
+    const value = window.prompt('New date and time (format: 2026-11-20 16:30)');
+    if (!value) return;
+    const date = new Date(value.replace(' ', 'T'));
+    if (isNaN(date.getTime())) {
+      setError('That date was not valid. Use the format 2026-11-20 16:30');
+      return;
+    }
+    setError('');
+    await api.put(`/sessions/${id}`, { startTime: date.toISOString(), status: 'scheduled' });
+    load();
+  };
+
   return (
-    <div style={{ maxWidth: 900, margin: '2rem auto', padding: '0 1rem' }}>
+    <div style={{ maxWidth: 1000, margin: '2rem auto', padding: '0 1rem' }}>
       <h1>Sessions</h1>
 
       <form onSubmit={handleAdd} style={{ display: 'grid', gap: 8, marginBottom: 24, maxWidth: 400 }}>
@@ -100,6 +113,7 @@ export default function Sessions() {
               <td>
                 <button onClick={() => mark(s._id, 'present')}>Present</button>{' '}
                 <button onClick={() => mark(s._id, 'absent')}>Absent</button>{' '}
+                <button onClick={() => reschedule(s._id)}>Reschedule</button>{' '}
                 <button onClick={() => cancel(s._id)}>Cancel</button>
               </td>
             </tr>
