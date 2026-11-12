@@ -7,6 +7,8 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [students, setStudents] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [gradingId, setGradingId] = useState(null);
+  const [gradeForm, setGradeForm] = useState({ marksObtained: '', feedback: '' });
   const [error, setError] = useState('');
 
   const load = async () => {
@@ -46,13 +48,24 @@ export default function Assignments() {
     }
   };
 
-  const grade = async (a) => {
-    const marks = window.prompt(`Marks out of ${a.maxMarks}:`);
-    if (marks === null) return;
-    const feedback = window.prompt('Feedback (optional):') || '';
+  const startGrade = (a) => {
     setError('');
+    setGradingId(a._id);
+    setGradeForm({ marksObtained: a.marksObtained ?? '', feedback: a.feedback || '' });
+  };
+
+  const saveGrade = async (a) => {
+    setError('');
+    if (gradeForm.marksObtained === '') {
+      setError('Enter the marks first');
+      return;
+    }
     try {
-      await api.patch(`/assignments/${a._id}/grade`, { marksObtained: Number(marks), feedback });
+      await api.patch(`/assignments/${a._id}/grade`, {
+        marksObtained: Number(gradeForm.marksObtained),
+        feedback: gradeForm.feedback,
+      });
+      setGradingId(null);
       load();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not grade assignment');
@@ -91,12 +104,12 @@ export default function Assignments() {
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr>
-            <th>Student</th><th>Title</th><th>Subject</th><th>Due</th><th>Status</th><th>Marks</th><th></th>
+            <th>Student</th><th>Title</th><th>Subject</th><th>Due</th><th>Status</th><th>Marks</th><th>Feedback</th><th></th>
           </tr>
         </thead>
         <tbody>
           {assignments.length === 0 && (
-            <tr><td colSpan="7">No assignments yet.</td></tr>
+            <tr><td colSpan="8">No assignments yet.</td></tr>
           )}
           {assignments.map((a) => (
             <tr key={a._id}>
@@ -108,11 +121,47 @@ export default function Assignments() {
                 {a.overdue && <span style={{ color: 'tomato' }}> (overdue)</span>}
               </td>
               <td>{a.status}</td>
-              <td>{a.status === 'graded' ? `${a.marksObtained}/${a.maxMarks}` : '-'}</td>
               <td>
-                {a.status === 'assigned' && <button onClick={() => markSubmitted(a._id)}>Mark submitted</button>}{' '}
-                {a.status !== 'graded' && <button onClick={() => grade(a)}>Grade</button>}{' '}
-                <button onClick={() => remove(a._id)}>Delete</button>
+                {gradingId === a._id ? (
+                  <input
+                    type="number"
+                    min="0"
+                    max={a.maxMarks}
+                    placeholder={`out of ${a.maxMarks}`}
+                    style={{ width: 90 }}
+                    value={gradeForm.marksObtained}
+                    onChange={(e) => setGradeForm({ ...gradeForm, marksObtained: e.target.value })}
+                  />
+                ) : a.status === 'graded' ? (
+                  `${a.marksObtained}/${a.maxMarks}`
+                ) : (
+                  '-'
+                )}
+              </td>
+              <td>
+                {gradingId === a._id ? (
+                  <input
+                    placeholder="Feedback (optional)"
+                    value={gradeForm.feedback}
+                    onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })}
+                  />
+                ) : (
+                  a.feedback || '-'
+                )}
+              </td>
+              <td>
+                {gradingId === a._id ? (
+                  <>
+                    <button onClick={() => saveGrade(a)}>Save</button>{' '}
+                    <button onClick={() => setGradingId(null)}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    {a.status === 'assigned' && <button onClick={() => markSubmitted(a._id)}>Mark submitted</button>}{' '}
+                    <button onClick={() => startGrade(a)}>{a.status === 'graded' ? 'Regrade' : 'Grade'}</button>{' '}
+                    <button onClick={() => remove(a._id)}>Delete</button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
