@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import DashboardCharts from '../components/DashboardCharts';
 
 const card = { border: '1px solid #444', borderRadius: 8, padding: 16, minWidth: 160 };
 
@@ -67,6 +68,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <DashboardCharts stats={stats} />
       <h2>Upcoming sessions</h2>
       {stats.upcoming.length === 0 ? (
         <p>No upcoming sessions.</p>
