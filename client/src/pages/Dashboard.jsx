@@ -50,6 +50,21 @@ export default function Dashboard() {
             Late: {stats.attendance.late}
           </p>
         </div>
+        <div style={card}>
+          <h3>Fees ({stats.fees.month})</h3>
+          <p style={{ margin: 0 }}>
+            Billed: {stats.fees.billed}<br />
+            Collected: {stats.fees.collected}<br />
+            Pending: {stats.fees.pending}
+          </p>
+        </div>
+        <div style={card}>
+          <h3>Assignments</h3>
+          <p style={{ margin: 0 }}>
+            Overdue: {stats.assignments.overdue}<br />
+            To grade: {stats.assignments.toGrade}
+          </p>
+        </div>
       </div>
 
       <h2>Upcoming sessions</h2>
