@@ -9,6 +9,7 @@ const sessionSchema = new mongoose.Schema(
     status: { type: String, enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' },
     attendance: { type: String, enum: ['unmarked', 'present', 'absent', 'late'], default: 'unmarked' },
     seriesId: { type: String },
+    meetLink: { type: String, trim: true },
     notes: { type: String, trim: true },
   },
   { timestamps: true }
