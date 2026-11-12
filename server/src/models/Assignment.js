@@ -12,6 +12,7 @@ const assignmentSchema = new mongoose.Schema(
     maxMarks: { type: Number, default: 100, min: 1 },
     marksObtained: { type: Number, min: 0 },
     feedback: { type: String, trim: true },
+    submission: { fileName: String, originalName: String, uploadedAt: Date },
   },
   { timestamps: true }
 );
