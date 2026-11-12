@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
@@ -11,16 +11,16 @@ export default function Navbar() {
   };
 
   return (
-    <nav style={{ display: 'flex', gap: 16, padding: '12px 24px', borderBottom: '1px solid #444', alignItems: 'center' }}>
-      <strong>TutorFlow</strong>
+    <nav className="navbar">
+      <strong className="brand">TutorFlow</strong>
       {user ? (
         <>
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/students">Students</Link>
-          <Link to="/sessions">Sessions</Link>
-          <Link to="/assignments">Assignments</Link>
-          <Link to="/fees">Fees</Link>
-          <span style={{ marginLeft: 'auto' }}>{user.name} ({user.role})</span>
+          <NavLink to="/dashboard">Dashboard</NavLink>
+          <NavLink to="/students">Students</NavLink>
+          <NavLink to="/sessions">Sessions</NavLink>
+          <NavLink to="/fees">Fees</NavLink>
+          <NavLink to="/assignments">Assignments</NavLink>
+          <span className="spacer">{user.name} ({user.role})</span>
           <button onClick={handleLogout}>Logout</button>
         </>
       ) : (
