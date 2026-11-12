@@ -15,11 +15,17 @@ export default function Navbar() {
       <strong className="brand">TutorFlow</strong>
       {user ? (
         <>
-          <NavLink to="/dashboard">Dashboard</NavLink>
-          <NavLink to="/students">Students</NavLink>
-          <NavLink to="/sessions">Sessions</NavLink>
-          <NavLink to="/fees">Fees</NavLink>
-          <NavLink to="/assignments">Assignments</NavLink>
+          {user.role === 'tutor' ? (
+            <>
+              <NavLink to="/dashboard">Dashboard</NavLink>
+              <NavLink to="/students">Students</NavLink>
+              <NavLink to="/sessions">Sessions</NavLink>
+              <NavLink to="/fees">Fees</NavLink>
+              <NavLink to="/assignments">Assignments</NavLink>
+            </>
+          ) : (
+            <NavLink to="/dashboard">{user.role === 'parent' ? 'My Children' : 'My Portal'}</NavLink>
+          )}
           <span className="spacer">{user.name} ({user.role})</span>
           <button onClick={handleLogout}>Logout</button>
         </>

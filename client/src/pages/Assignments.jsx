@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { downloadFile } from '../services/download';
 
 const emptyForm = { student: '', title: '', subject: '', dueDate: '', maxMarks: 100 };
 
@@ -158,6 +159,7 @@ export default function Assignments() {
                 ) : (
                   <>
                     {a.status === 'assigned' && <button onClick={() => markSubmitted(a._id)}>Mark submitted</button>}{' '}
+                {a.submission?.fileName && <><button onClick={() => downloadFile(`/portal/assignments/${a._id}/file`, a.submission.originalName)}>View file</button>{" "}</>}
                     <button onClick={() => startGrade(a)}>{a.status === 'graded' ? 'Regrade' : 'Grade'}</button>{' '}
                     <button onClick={() => remove(a._id)}>Delete</button>
                   </>
