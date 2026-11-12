@@ -18,6 +18,7 @@ export default function Navbar() {
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/students">Students</Link>
           <Link to="/sessions">Sessions</Link>
+          <Link to="/fees">Fees</Link>
           <span style={{ marginLeft: 'auto' }}>{user.name} ({user.role})</span>
           <button onClick={handleLogout}>Logout</button>
         </>
