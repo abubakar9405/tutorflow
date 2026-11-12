@@ -1,5 +1,7 @@
 const Student = require('../models/Student');
 const Session = require('../models/Session');
+const Invoice = require('../models/Invoice');
+const Assignment = require('../models/Assignment');
 
 exports.getStats = async (req, res) => {
   try {
@@ -9,8 +11,9 @@ exports.getStats = async (req, res) => {
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    const [totalStudents, sessionsToday, upcoming, attendanceAgg] = await Promise.all([
+    const [totalStudents, sessionsToday, upcoming, attendanceAgg, invoices, overdue, toGrade] = await Promise.all([
       Student.countDocuments({ active: true }),
       Session.countDocuments({
         startTime: { $gte: startOfDay, $lte: endOfDay },
@@ -24,6 +27,9 @@ exports.getStats = async (req, res) => {
         { $match: { startTime: { $gte: startOfMonth }, attendance: { $ne: 'unmarked' } } },
         { $group: { _id: '$attendance', count: { $sum: 1 } } },
       ]),
+      Invoice.find({ month }),
+      Assignment.countDocuments({ status: 'assigned', dueDate: { $lt: now } }),
+      Assignment.countDocuments({ status: 'submitted' }),
     ]);
 
     const attendance = { present: 0, absent: 0, late: 0 };
@@ -31,7 +37,17 @@ exports.getStats = async (req, res) => {
       attendance[a._id] = a.count;
     });
 
-    res.json({ totalStudents, sessionsToday, upcoming, attendance });
+    const billed = invoices.reduce((s, i) => s + i.amount, 0);
+    const collected = invoices.reduce((s, i) => s + i.payments.reduce((x, p) => x + p.amount, 0), 0);
+
+    res.json({
+      totalStudents,
+      sessionsToday,
+      upcoming,
+      attendance,
+      fees: { month, billed, collected, pending: billed - collected },
+      assignments: { overdue, toGrade },
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
