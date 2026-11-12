@@ -1,3 +1,4 @@
+import './badges.js';
 import './tilt.js';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
