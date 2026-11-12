@@ -236,3 +236,21 @@ p[style*="font-size"] {
 }
 .chart-panel h3 { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .muted { color: var(--muted); }
+
+/* status badges */
+td[data-badge] { font-weight: 600; text-transform: capitalize; }
+td[data-badge]::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+td[data-badge='ok'] { color: #34d399; }
+td[data-badge='info'] { color: #60a5fa; }
+td[data-badge='warn'] { color: #fbbf24; }
+td[data-badge='bad'] { color: #f87171; }
+td[data-badge='muted'] { color: var(--muted); }
