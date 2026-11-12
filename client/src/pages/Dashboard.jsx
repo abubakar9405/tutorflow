@@ -1,3 +1,4 @@
+import Portal from './Portal';
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -18,14 +19,7 @@ export default function Dashboard() {
       .catch(() => setError('Could not load dashboard'));
   }, [user]);
 
-  if (user?.role !== 'tutor') {
-    return (
-      <div style={{ maxWidth: 700, margin: '2rem auto', padding: '0 1rem' }}>
-        <h1>Welcome, {user?.name}</h1>
-        <p>Your student and parent views are coming soon.</p>
-      </div>
-    );
-  }
+  if (user?.role !== 'tutor') return <Portal />;
 
   if (error) return <p style={{ color: 'red', padding: 24 }}>{error}</p>;
   if (!stats) return <p style={{ padding: 24 }}>Loading...</p>;
