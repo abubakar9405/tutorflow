@@ -13,6 +13,7 @@ const assignmentSchema = new mongoose.Schema(
     marksObtained: { type: Number, min: 0 },
     feedback: { type: String, trim: true },
     submission: { fileName: String, originalName: String, uploadedAt: Date },
+    attachment: { fileName: String, originalName: String, uploadedAt: Date },
   },
   { timestamps: true }
 );

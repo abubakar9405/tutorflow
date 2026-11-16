@@ -158,17 +158,26 @@ export default function Portal() {
           <table>
             <thead>
               <tr>
-                <th>Title</th><th>Due</th><th>Status</th><th>Marks</th><th>Feedback</th>
+                <th>Title</th><th>Task file</th><th>Due</th><th>Status</th><th>Marks</th><th>Feedback</th>
                 {!isParent && <th>My file</th>}
               </tr>
             </thead>
             <tbody>
               {data.assignments.length === 0 && (
-                <tr><td colSpan={isParent ? 5 : 6}>No assignments yet.</td></tr>
+                <tr><td colSpan={isParent ? 6 : 7}>No assignments yet.</td></tr>
               )}
               {data.assignments.map((a) => (
                 <tr key={a._id}>
                   <td>{a.title}</td>
+                  <td>
+                    {a.attachment?.fileName ? (
+                      <button onClick={() => downloadFile(`/attachments/${a._id}`, a.attachment.originalName)}>
+                        {a.attachment.originalName}
+                      </button>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
                   <td>
                     {new Date(a.dueDate).toLocaleDateString()}
                     {a.overdue && <span style={{ color: 'tomato' }}> (overdue)</span>}

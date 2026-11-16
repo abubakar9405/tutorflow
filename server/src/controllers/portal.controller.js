@@ -33,7 +33,7 @@ exports.getOverview = async (req, res) => {
     const [upcoming, past, assignments] = await Promise.all([
       Session.find({ student: id, status: 'scheduled', startTime: { $gte: now } })
         .select('-notes').sort({ startTime: 1 }).limit(10),
-      Session.find({ student: id, status: { $ne: 'cancelled' }, startTime: { $lt: now } })
+      Session.find({ student: id, status: { $ne: 'cancelled' }, $or: [{ startTime: { $lt: now } }, { status: 'completed' }] })
         .select('-notes').sort({ startTime: -1 }).limit(20),
       Assignment.find({ student: id }).sort({ dueDate: 1 }),
     ]);
