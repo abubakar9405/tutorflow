@@ -22,6 +22,7 @@ export default function Navbar() {
               <NavLink to="/sessions">Sessions</NavLink>
               <NavLink to="/fees">Fees</NavLink>
               <NavLink to="/assignments">Assignments</NavLink>
+              <NavLink to="/accounts">Accounts</NavLink>
             </>
           ) : (
             <NavLink to="/dashboard">{user.role === 'parent' ? 'My Children' : 'My Portal'}</NavLink>
@@ -32,7 +33,6 @@ export default function Navbar() {
       ) : (
         <>
           <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
         </>
       )}
     </nav>

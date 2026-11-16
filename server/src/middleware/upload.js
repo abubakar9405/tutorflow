@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 
 // Local disk for now. On a real deployment, swap this for cloud storage.
-const dir = path.join(__dirname, '../../uploads');
+const dir = process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads');
 fs.mkdirSync(dir, { recursive: true });
 
 const allowed = ['.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx', '.txt'];
