@@ -8,8 +8,12 @@ export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [students, setStudents] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [newFile, setNewFile] = useState(null);
+  const [fileKey, setFileKey] = useState(0);
+  const [rowFiles, setRowFiles] = useState({});
   const [gradingId, setGradingId] = useState(null);
   const [gradeForm, setGradeForm] = useState({ marksObtained: '', feedback: '' });
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const load = async () => {
@@ -28,15 +32,67 @@ export default function Assignments() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  const sendFile = async (id, file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    await api.post(`/attachments/${id}`, fd);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     try {
-      await api.post('/assignments', { ...form, maxMarks: Number(form.maxMarks) || 100 });
+      const res = await api.post('/assignments', { ...form, maxMarks: Number(form.maxMarks) || 100 });
+      if (newFile) {
+        try {
+          await sendFile(res.data._id, newFile);
+        } catch (err) {
+          setError('Assignment saved, but the file failed: ' + (err.response?.data?.message || 'upload error'));
+        }
+      }
       setForm(emptyForm);
+      setNewFile(null);
+      setFileKey(fileKey + 1);
       load();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not save assignment');
+    }
+  };
+
+  const attach = async (a) => {
+    setError('');
+    setMessage('');
+    const file = rowFiles[a._id];
+    if (!file) {
+      setError('Choose a file first');
+      return;
+    }
+    try {
+      await sendFile(a._id, file);
+      setRowFiles({ ...rowFiles, [a._id]: null });
+      setMessage('Task file attached');
+      load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Upload failed');
+    }
+  };
+
+  const removeAttachment = async (id) => {
+    if (!window.confirm('Remove the task file?')) return;
+    try {
+      await api.delete(`/attachments/${id}`);
+      load();
+    } catch (err) {
+      setError('Could not remove the file');
+    }
+  };
+
+  const view = async (url, name) => {
+    try {
+      await downloadFile(url, name);
+    } catch (err) {
+      setError('Could not open the file');
     }
   };
 
@@ -87,8 +143,9 @@ export default function Assignments() {
     <div style={{ padding: 24 }}>
       <h2>Assignments</h2>
       {error && <p style={{ color: 'tomato' }}>{error}</p>}
+      {message && <p style={{ color: 'lightgreen' }}>{message}</p>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 24 }}>
         <select name="student" value={form.student} onChange={handleChange} required>
           <option value="">Select student</option>
           {students.map((s) => (
@@ -99,23 +156,37 @@ export default function Assignments() {
         <input name="subject" placeholder="Subject" value={form.subject} onChange={handleChange} />
         <input name="dueDate" type="date" value={form.dueDate} onChange={handleChange} required />
         <input name="maxMarks" type="number" min="1" placeholder="Max marks" value={form.maxMarks} onChange={handleChange} style={{ width: 100 }} />
+        <input key={fileKey} type="file" onChange={(e) => setNewFile(e.target.files[0] || null)} title="Task file (optional)" />
         <button type="submit">Add assignment</button>
       </form>
 
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+      <table>
         <thead>
           <tr>
-            <th>Student</th><th>Title</th><th>Subject</th><th>Due</th><th>Status</th><th>Marks</th><th>Feedback</th><th></th>
+            <th>Student</th><th>Title</th><th>Task file</th><th>Subject</th><th>Due</th><th>Status</th><th>Marks</th><th>Feedback</th><th></th>
           </tr>
         </thead>
         <tbody>
           {assignments.length === 0 && (
-            <tr><td colSpan="8">No assignments yet.</td></tr>
+            <tr><td colSpan="9">No assignments yet.</td></tr>
           )}
           {assignments.map((a) => (
             <tr key={a._id}>
               <td>{a.student?.name}</td>
               <td>{a.title}</td>
+              <td>
+                {a.attachment?.fileName ? (
+                  <>
+                    <button onClick={() => view(`/attachments/${a._id}`, a.attachment.originalName)}>View task file</button>{' '}
+                    <button onClick={() => removeAttachment(a._id)}>Remove file</button>
+                  </>
+                ) : (
+                  <>
+                    <input type="file" onChange={(e) => setRowFiles({ ...rowFiles, [a._id]: e.target.files[0] })} />{' '}
+                    <button onClick={() => attach(a)}>Attach file</button>
+                  </>
+                )}
+              </td>
               <td>{a.subject}</td>
               <td>
                 {new Date(a.dueDate).toLocaleDateString()}
@@ -158,8 +229,12 @@ export default function Assignments() {
                   </>
                 ) : (
                   <>
+                    {a.submission?.fileName && (
+                      <>
+                        <button onClick={() => view(`/portal/assignments/${a._id}/file`, a.submission.originalName)}>View student file</button>{' '}
+                      </>
+                    )}
                     {a.status === 'assigned' && <button onClick={() => markSubmitted(a._id)}>Mark submitted</button>}{' '}
-                {a.submission?.fileName && <><button onClick={() => downloadFile(`/portal/assignments/${a._id}/file`, a.submission.originalName)}>View file</button>{" "}</>}
                     <button onClick={() => startGrade(a)}>{a.status === 'graded' ? 'Regrade' : 'Grade'}</button>{' '}
                     <button onClick={() => remove(a._id)}>Delete</button>
                   </>
