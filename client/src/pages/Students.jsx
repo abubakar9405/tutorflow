@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
-const emptyForm = { name: '', grade: '', parentName: '', monthlyFee: '' };
+const emptyForm = { name: '', grade: '', parentName: '', parentEmail: '', studentEmail: '', monthlyFee: '' };
 
 export default function Students() {
   const [students, setStudents] = useState([]);
@@ -49,6 +49,8 @@ export default function Students() {
       name: s.name || '',
       grade: s.grade || '',
       parentName: s.parentName || '',
+      parentEmail: s.parentEmail || '',
+      studentEmail: s.studentEmail || '',
       monthlyFee: s.monthlyFee ?? '',
     });
   };
@@ -72,6 +74,8 @@ export default function Students() {
         <input name="name" placeholder="Student name" value={form.name} onChange={handleChange} required />
         <input name="grade" placeholder="Grade (e.g. IGCSE)" value={form.grade} onChange={handleChange} />
         <input name="parentName" placeholder="Parent name" value={form.parentName} onChange={handleChange} />
+        <input name="parentEmail" type="email" placeholder="Parent email (for the parent portal)" value={form.parentEmail} onChange={handleChange} />
+        <input name="studentEmail" type="email" placeholder="Student email (for the student portal)" value={form.studentEmail} onChange={handleChange} />
         <input name="monthlyFee" type="number" placeholder="Monthly fee" value={form.monthlyFee} onChange={handleChange} />
         <button type="submit">{editingId ? 'Save changes' : 'Add student'}</button>
         {editingId && <button type="button" onClick={cancelEdit}>Cancel edit</button>}

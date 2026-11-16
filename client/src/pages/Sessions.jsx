@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 
-const emptyForm = { student: '', subject: '', startTime: '', repeatWeeks: 0 };
+const emptyForm = { student: '', subject: '', startTime: '', repeatWeeks: 0, meetLink: '' };
+const safeLink = (u) => (/^https?:\/\//i.test(u || '') ? u : null);
 
 export default function Sessions() {
   const [sessions, setSessions] = useState([]);
@@ -34,6 +35,7 @@ export default function Sessions() {
         subject: form.subject,
         startTime: new Date(form.startTime).toISOString(),
         repeatWeeks: Number(form.repeatWeeks) || 0,
+        meetLink: form.meetLink,
       });
       setForm(emptyForm);
       load();
@@ -77,6 +79,13 @@ export default function Sessions() {
           ))}
         </select>
         <input name="subject" placeholder="Subject" value={form.subject} onChange={handleChange} required />
+        <input
+          name="meetLink"
+          type="url"
+          placeholder="Meet link (https://meet.google.com/...)"
+          value={form.meetLink}
+          onChange={handleChange}
+        />
         <input name="startTime" type="datetime-local" value={form.startTime} onChange={handleChange} required />
         <input
           name="repeatWeeks"
@@ -91,11 +100,12 @@ export default function Sessions() {
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table>
         <thead>
           <tr>
             <th>Student</th>
             <th>Subject</th>
+            <th>Meet</th>
             <th>Date and time</th>
             <th>Status</th>
             <th>Attendance</th>
@@ -107,6 +117,13 @@ export default function Sessions() {
             <tr key={s._id}>
               <td>{s.student?.name}</td>
               <td>{s.subject}</td>
+              <td>
+                {safeLink(s.meetLink) ? (
+                  <a href={safeLink(s.meetLink)} target="_blank" rel="noreferrer noopener">Link</a>
+                ) : (
+                  '-'
+                )}
+              </td>
               <td>{new Date(s.startTime).toLocaleString()}</td>
               <td>{s.status}</td>
               <td>{s.attendance}</td>
